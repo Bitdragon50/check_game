@@ -27,7 +27,7 @@ pub enum Suit {
 }
 
 
-#[derive(Debug,EnumIter,PartialEq)]
+#[derive(Debug,EnumIter,PartialEq,Clone)]
 pub enum Rank {
     Ace,
     Two,
@@ -46,7 +46,7 @@ pub enum Rank {
 
 
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct Card {
     pub suit: Suit,
     pub rank: Rank
@@ -98,5 +98,12 @@ impl Deck<Unshuffled> {
         let mut rng = thread_rng();
         self.cards.shuffle(&mut rng);
         Deck { state: Shuffled, cards: self.cards }
+    }
+}
+
+impl Deck<Shuffled> {
+    pub fn to_vec(self) -> Vec<Card> {
+        let card_vec = self.cards.to_vec();
+        card_vec
     }
 }
