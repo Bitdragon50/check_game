@@ -18,7 +18,7 @@ pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(mut vec: Vec<Card>) -
 
 
 
-#[derive(Debug,EnumIter,Clone,PartialEq)]
+#[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy)]
 pub enum Suit {
     Spade,
     Club,
@@ -27,7 +27,7 @@ pub enum Suit {
 }
 
 
-#[derive(Debug,EnumIter,PartialEq,Clone)]
+#[derive(Debug,EnumIter,PartialEq,Clone,PartialOrd,Eq,Ord,Copy)]
 pub enum Rank {
     Ace,
     Two,
@@ -46,10 +46,10 @@ pub enum Rank {
 
 
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq,PartialOrd, Eq,Ord, Copy)]
 pub struct Card {
-    pub suit: Suit,
-    pub rank: Rank
+    pub rank: Rank,
+    pub suit: Suit
 }
 
 impl Card {
@@ -105,5 +105,13 @@ impl Deck<Shuffled> {
     pub fn to_vec(self) -> Vec<Card> {
         let card_vec = self.cards.to_vec();
         card_vec
+    }
+}
+
+impl FromIterator<Card> for Card {
+    fn from_iter<T: IntoIterator<Item = Card>>(iter: T) -> Self {
+        let mut cards: Vec<Card> = iter.into_iter().collect();
+        cards.sort();
+        Card { suit: cards[0].suit, rank: cards[0].rank }
     }
 }
