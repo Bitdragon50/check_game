@@ -20,10 +20,10 @@ pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(mut vec: Vec<Card>) -
 
 #[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy)]
 pub enum Suit {
-    Spade,
-    Club,
-    Diamond,
-    Heart
+    Spades,
+    Clubs,
+    Diamonds,
+    Hearts
 }
 
 
@@ -113,5 +113,11 @@ impl FromIterator<Card> for Card {
         let mut cards: Vec<Card> = iter.into_iter().collect();
         cards.sort();
         Card { suit: cards[0].suit, rank: cards[0].rank }
+    }
+}
+
+impl Card {
+    pub fn name(self) -> String {
+        format!("{:#?} of {:#?}", &self.rank , &self.suit)
     }
 }

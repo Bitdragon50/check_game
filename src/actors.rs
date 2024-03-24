@@ -4,7 +4,7 @@ use crate::lib::{Card, Deck, Shuffled};
 
 #[derive(Debug)]
 pub struct Board {
-    cards: Vec<Card>
+    pub cards: Vec<Card>
 }
 
 #[derive(Debug)]
@@ -35,21 +35,27 @@ impl Board {
 }
 
 impl Table {
-        pub fn play(&mut self, player: &mut Player) {
-            let mut card_position_input = String::new();
-            io::stdin().read_line(&mut card_position_input)
-            .expect("Failed to read from stdin");
-    
-            let card_position: u8 = card_position_input.trim().parse()
-            .expect("Please type a number!");
+        pub fn play(&mut self, player: &mut Player,board: &mut Board, card: &mut Card) {
+            println!("Player {:#?} plays {:#?}",&player.name, card.name());
+         
+            if self.playable(card){ 
+                println!("Player {:#?} plays {:#?}",&player, card);
+                self.cards.push(player.cards.remove(player.cards.iter().position(|iter_card| iter_card == card).unwrap())); 
+            } else {
+                println!("{:#?} you can't play {:#?} on {:#?}", player.name, card.name(), self.cards.get(self.cards.len()-1).unwrap().name());
+                println!("{:#?} is getting {:#?} from the board", player.name, board.cards.get(board.cards.len()-1).unwrap().name() );
+                give_card(1, player, board)
+            }
+        }
 
-            self.cards.push(player.cards.remove(card_position as usize));
+        fn playable(&mut self, card: &Card) -> bool {
+            self.cards[self.cards.len()-1].rank == card.rank || self.cards[self.cards.len()-1].suit == card.suit 
         }
 }
 
 pub fn take_card(board: &mut Board, player: &mut Player) {
-    player.cards.push(board.cards.pop().unwrap())
-}
+            player.cards.push(board.cards.pop().unwrap())
+        }
 
 pub fn give_card(amount: usize, player: &mut Player, board: &mut Board) {
     player.cards.push(board.cards.drain(..amount).collect())
