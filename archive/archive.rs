@@ -77,12 +77,3 @@ impl Handler<Card> for Player{
     }
     
 }
-
-// Players play in turns
-// Players can play cards to the table
-// if a player has no valid card to play, they must pick up a card from the board
-
-// The board divvies cards to the players and one to the table at the start of the game
-// If a power card like 2 and 4 are played, then the board will give the next player the associated number of cards
-
-// The table validates a play and announces each players turn
