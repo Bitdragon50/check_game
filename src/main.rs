@@ -1,6 +1,6 @@
 mod lib;
 mod actors;
-use crate::{actors::{play, take_card, Board, Player}, lib::Deck};
+use crate::{actors::{take_card, Board,Table}, lib::Deck};
 fn main() {
     let playing_deck = Deck::new();
    // println!("{:#?}", &playing_deck);
@@ -12,7 +12,7 @@ fn main() {
     
     println!("{:#?}", &table);
     println!("player 1 is {:#?}", &plays[0] );
-    play(&mut plays[0], &mut table, 2);
+    table.play(&mut plays[0]);
     println!("player 1 is {:#?}", &table  );//plays[0] )
     println!("player 1 is {:#?}", &plays[0] );
     println!("player 2 is {:#?}", &plays[1] );

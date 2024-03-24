@@ -1,3 +1,5 @@
+use std::io;
+
 use crate::lib::{Card, Deck, Shuffled};
 
 #[derive(Debug)]
@@ -7,7 +9,7 @@ pub struct Board {
 
 #[derive(Debug)]
 pub struct Table {
-    cards: Vec<Card>
+    pub cards: Vec<Card>
 }
 
 #[derive(Debug,Clone)]
@@ -32,8 +34,17 @@ impl Board {
     }
 }
 
-pub fn play(player: &mut Player,table: &mut Table, card_position: usize) {
-    table.cards.push(player.cards.remove(card_position));
+impl Table {
+        pub fn play(&mut self, player: &mut Player) {
+            let mut card_position_input = String::new();
+            io::stdin().read_line(&mut card_position_input)
+            .expect("Failed to read from stdin");
+    
+            let card_position: u8 = card_position_input.trim().parse()
+            .expect("Please type a number!");
+
+            self.cards.push(player.cards.remove(card_position as usize));
+        }
 }
 
 pub fn take_card(board: &mut Board, player: &mut Player) {
