@@ -1,4 +1,4 @@
-use std::io;
+use std::{collections::HashSet, io};
 
 use crate::lib::{Card, Deck, Rank, Shuffled, Suit};
 
@@ -41,7 +41,7 @@ impl Table {
             if self.playable(Some((&card.rank,&card.suit))){ 
                 println!("Player {:#?} plays {:#?}",&player, card);
                 self.cards.push(player.cards.remove(player.cards.iter().position(|iter_card| iter_card == card).unwrap()));
-                if card.rank == Rank::Jack { } 
+                if card.rank == Rank::Jack { self.cards.push( Card{ rank: card.rank , suit:  card.rank.change_to().unwrap() })} 
             } else {
                 println!("{:#?} you can't play {:#?} on {:#?}", player.name, card.name(), self.cards.get(self.cards.len()-1).unwrap().name());
                 println!("{:#?} is getting {:#?} from the board", player.name, board.cards.get(board.cards.len()-1).unwrap().name() );
@@ -50,11 +50,29 @@ impl Table {
         }
 
         fn playable(&mut self, card: Option<(&Rank,&Suit)>) -> bool {
-            // if card.rank != Rank::Jack {
-                &self.cards[self.cards.len()-1].rank == card.unwrap().0 || &self.cards[self.cards.len()-1].suit == card.unwrap().1
-            // } else {
-            //     card.rank.change_to()
-            // }
+            let incoming_suit = card.unwrap().1;
+            let incoming_rank = card.unwrap().0;
+            let card_on_deck = self.cards[self.cards.len()-1];
+
+            if incoming_rank != &Rank::Joker && card_on_deck.rank != Rank::Joker { //if incoming card isn't a joker
+                &card_on_deck.rank == incoming_rank || &card_on_deck.suit == incoming_suit
+            } else {
+                let mut red_set = HashSet::new();
+                let mut black_set = HashSet::new();
+                red_set.insert(Suit::Diamonds);
+                red_set.insert(Suit::Red);
+                red_set.insert(Suit::Hearts);
+                black_set.insert(Suit::Spades);
+                black_set.insert(Suit::Black);
+                black_set.insert(Suit::Clubs);
+                // red jokers play on diamonds and heart
+                if red_set.contains(incoming_suit) && red_set.contains(&card_on_deck.suit) {
+                    return true
+                } else if black_set.contains(incoming_suit) && black_set.contains(&card_on_deck.suit) {
+                    return true
+                } else { return false }
+                
+            }
         }
 }
 

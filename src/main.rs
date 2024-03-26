@@ -8,28 +8,19 @@ use std::{any::Any, collections::HashSet, io};
 
 fn main() {
     let playing_deck = Deck::new();
-    // println!("{:#?}", &playing_deck);
 
-    //println!("{:#?}", playing_deck.shuffle_deck());
     let players = vec!["Alan".to_owned(), "Mamitha".to_owned()];
 
     let (mut board, mut table, mut plays) = Board::new(playing_deck.shuffle_deck(), players);
 
     println!("{:#?}", &table);
     println!("player 1 is {:#?}", &plays[0]);
-    //table.play(&mut plays[0]);
-    // println!("player 1 is {:#?}", &table  );//plays[0] )
-    //println!("player 1 is {:#?}", &plays[0] );
-    // println!("player 2 is {:#?}", &plays[1] );
-    // take_card (&mut board, &mut plays[1]);
-    // println!("{:#?} has these cards {:#?}", &plays[1].name , &plays[1].cards );
 
     let mut pickup: usize = 0;
     let mut skipped: bool = false;
+    let mut gameover = false;
 
-    loop
-    /* No player has emptied their hands */
-    {
+    while !gameover {
         for player in &mut plays {
             println!("It is {:#?}'s turn ", player.name);
             if skipped {
@@ -38,11 +29,11 @@ fn main() {
                     &table.cards[table.cards.len() - 1].name()
                 );
                 skipped = false;
-                if pickup != 0 { 
+                if pickup != 0 {
                     println!("You are picking up {}", &pickup);
-                    give_card(pickup, player, &mut board); }
+                    give_card(pickup, player, &mut board);
+                }
                 continue;
-
             } else {
                 println!("You have {:#?} cards in your hands.", &player.cards.len());
                 println!("Your cards are {:#?}", player.cards);
@@ -75,28 +66,23 @@ fn main() {
                     1.. => {
                         let mut card = player.cards[card_position - 1];
                         let mut power_cards = HashSet::new();
-                        power_cards.insert(&Rank::Four);
-                        power_cards.insert(&Rank::Two);
+                        power_cards.insert(&Rank::Joker);
+                        power_cards.insert(&Rank::Seven);
                         if power_cards.contains(&card.rank) {
                             pickup = card.rank.pickup().unwrap();
+                            skipped = true
+                        }
+
+                        if card.rank == Rank::Ace {
                             skipped = true
                         }
                         table.play(player, &mut board, &mut card)
                     }
                 }
                 if player.cards.len() == 0 {
-                    break;
+                    gameover = true;
                 }
             }
         }
     }
 }
-
-// Players play in turns
-// Players can play cards to the table
-// if a player has no valid card to play, they must pick up a card from the board
-
-// The board divvies cards to the players and one to the table at the start of the game
-// If a power card like 2 and 4 are played, then the board will give the next player the associated number of cards
-
-// The table validates a play and announces each players turn
