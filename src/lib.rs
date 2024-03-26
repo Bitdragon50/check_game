@@ -18,7 +18,7 @@ pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(mut vec: Vec<Card>) -
 
 
 
-#[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy)]
+#[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy, Hash)]
 pub enum Suit {
     Spades,
     Clubs,
@@ -27,7 +27,7 @@ pub enum Suit {
 }
 
 
-#[derive(Debug,EnumIter,PartialEq,Clone,PartialOrd,Eq,Ord,Copy)]
+#[derive(Debug,EnumIter,PartialEq,Clone,PartialOrd,Eq,Ord,Copy,Hash)]
 pub enum Rank {
     Ace,
     Two,
@@ -46,7 +46,7 @@ pub enum Rank {
 
 
 
-#[derive(Debug,Clone,PartialEq,PartialOrd, Eq,Ord, Copy)]
+#[derive(Debug,Clone,PartialEq,PartialOrd, Eq,Ord, Copy, Hash)]
 pub struct Card {
     pub rank: Rank,
     pub suit: Suit
