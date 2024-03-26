@@ -1,12 +1,14 @@
 mod actors;
 mod lib;
 use crate::{
-    actors::{give_card, take_card, Board, Table},
+    actors::{give_card,  Board},
     lib::{Deck, Rank},
 };
-use std::{any::Any, collections::HashSet, io};
+use std::{collections::HashSet, io};
 
 fn main() {
+
+    
     let playing_deck = Deck::new();
 
     let players = vec!["Alan".to_owned(), "Mamitha".to_owned()];
@@ -79,6 +81,7 @@ fn main() {
                         table.play(player, &mut board, &mut card)
                     }
                 }
+                if board.cards.len() < 6 { board.shuffle_board(&mut table) }
                 if player.cards.len() == 0 {
                     gameover = true;
                 }
