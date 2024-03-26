@@ -3,6 +3,7 @@ use strum_macros::EnumIter;
 use strum::IntoEnumIterator;
 use std::convert::TryInto;
 use std::fmt::Debug;
+use std::io; //any::Any, collections::HashSet, 
 use rand::seq::SliceRandom; // Trait that provides the shuffle method
 use rand::thread_rng;       // Function that provides a random number generator
 
@@ -18,7 +19,7 @@ pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(mut vec: Vec<Card>) -
 
 
 
-#[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy)]
+#[derive(Debug,EnumIter,Clone,PartialEq,Eq, PartialOrd, Ord, Copy,Hash)]
 pub enum Suit {
     Spades,
     Clubs,
@@ -27,7 +28,7 @@ pub enum Suit {
 }
 
 
-#[derive(Debug,EnumIter,PartialEq,Clone,PartialOrd,Eq,Ord,Copy)]
+#[derive(Debug,EnumIter,PartialEq,Clone,PartialOrd,Eq,Ord,Copy,Hash)]
 pub enum Rank {
     Ace,
     Two,
@@ -46,7 +47,7 @@ pub enum Rank {
 
 
 
-#[derive(Debug,Clone,PartialEq,PartialOrd, Eq,Ord, Copy)]
+#[derive(Debug,Clone,PartialEq,PartialOrd, Eq,Ord, Hash, Copy)]
 pub struct Card {
     pub rank: Rank,
     pub suit: Suit
@@ -117,7 +118,42 @@ impl FromIterator<Card> for Card {
 }
 
 impl Card {
-    pub fn name(self) -> String {
+    pub fn name(&self) -> String {
         format!("{:#?} of {:#?}", &self.rank , &self.suit)
     }
+}
+
+impl Rank {
+    pub fn pickup(&self) -> Option<usize> {
+        if self == &Rank::Four {
+            return Some(4)
+        } else if self == &Rank::Two {
+            return Some(2)
+        } else {
+            return None;
+        }
+    }
+
+
+
+    pub fn change_to(&self) -> Option<Suit> {
+        
+            println!("What suit do you want?");
+            let mut suit_input = String::new();
+            io::stdin().read_line(&mut suit_input)
+            .expect("Failed to read from stdin");    
+            //let mut suit: Suit;
+            if suit_input.to_lowercase() == "spades".to_string() {
+                return Some(Suit::Spades) 
+            } else if suit_input.to_lowercase() == "clubs".to_string() {
+                return Some(Suit::Clubs)                
+            } else if suit_input.to_lowercase() == "hearts".to_string() {
+                return Some(Suit::Hearts)
+            } else if suit_input.to_lowercase() == "diamonds".to_string() {
+                return Some(Suit::Diamonds)
+            } else {
+                return None
+            }
+    }
+    
 }

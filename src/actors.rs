@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::lib::{Card, Deck, Shuffled};
+use crate::lib::{Card, Deck, Rank, Shuffled, Suit};
 
 #[derive(Debug)]
 pub struct Board {
@@ -35,12 +35,13 @@ impl Board {
 }
 
 impl Table {
-        pub fn play(&mut self, player: &mut Player,board: &mut Board, card: &mut Card) {
+        pub fn play(&mut self, player: &mut Player, board: &mut Board, card: &mut Card) {
             println!("Player {:#?} plays {:#?}",&player.name, card.name());
          
-            if self.playable(card){ 
+            if self.playable(Some((&card.rank,&card.suit))){ 
                 println!("Player {:#?} plays {:#?}",&player, card);
-                self.cards.push(player.cards.remove(player.cards.iter().position(|iter_card| iter_card == card).unwrap())); 
+                self.cards.push(player.cards.remove(player.cards.iter().position(|iter_card| iter_card == card).unwrap()));
+                if card.rank == Rank::Jack { } 
             } else {
                 println!("{:#?} you can't play {:#?} on {:#?}", player.name, card.name(), self.cards.get(self.cards.len()-1).unwrap().name());
                 println!("{:#?} is getting {:#?} from the board", player.name, board.cards.get(board.cards.len()-1).unwrap().name() );
@@ -48,8 +49,12 @@ impl Table {
             }
         }
 
-        fn playable(&mut self, card: &Card) -> bool {
-            self.cards[self.cards.len()-1].rank == card.rank || self.cards[self.cards.len()-1].suit == card.suit 
+        fn playable(&mut self, card: Option<(&Rank,&Suit)>) -> bool {
+            // if card.rank != Rank::Jack {
+                &self.cards[self.cards.len()-1].rank == card.unwrap().0 || &self.cards[self.cards.len()-1].suit == card.unwrap().1
+            // } else {
+            //     card.rank.change_to()
+            // }
         }
 }
 

@@ -1,48 +1,94 @@
-mod lib;
 mod actors;
-use crate::{actors::{give_card, take_card, Board, Table}, lib::Deck};
-use std::io;
+mod lib;
+use crate::{
+    actors::{give_card, take_card, Board, Table},
+    lib::{Deck, Rank},
+};
+use std::{any::Any, collections::HashSet, io};
+
 fn main() {
     let playing_deck = Deck::new();
-   // println!("{:#?}", &playing_deck);
-    
+    // println!("{:#?}", &playing_deck);
+
     //println!("{:#?}", playing_deck.shuffle_deck());
     let players = vec!["Alan".to_owned(), "Mamitha".to_owned()];
 
     let (mut board, mut table, mut plays) = Board::new(playing_deck.shuffle_deck(), players);
-    
+
     println!("{:#?}", &table);
-    println!("player 1 is {:#?}", &plays[0] );
+    println!("player 1 is {:#?}", &plays[0]);
     //table.play(&mut plays[0]);
-   // println!("player 1 is {:#?}", &table  );//plays[0] )
+    // println!("player 1 is {:#?}", &table  );//plays[0] )
     //println!("player 1 is {:#?}", &plays[0] );
-   // println!("player 2 is {:#?}", &plays[1] );
-   // take_card (&mut board, &mut plays[1]);
-   // println!("{:#?} has these cards {:#?}", &plays[1].name , &plays[1].cards );
+    // println!("player 2 is {:#?}", &plays[1] );
+    // take_card (&mut board, &mut plays[1]);
+    // println!("{:#?} has these cards {:#?}", &plays[1].name , &plays[1].cards );
 
-    while &plays[0].cards.len() != &(0 as usize) && &plays[1].cards.len() != &(0 as usize) /* No player has emptied their hands */ {
-        for player in &mut plays{
+    let mut pickup: usize = 0;
+    let mut skipped: bool = false;
+
+    loop
+    /* No player has emptied their hands */
+    {
+        for player in &mut plays {
             println!("It is {:#?}'s turn ", player.name);
-            println!("You have {:#?} cards in your hands.", &player.cards.len());
-            println!("Your cards are {:#?}", player.cards);
-            println!("There is {:#?} on the table. {:#?}", table.cards[table.cards.len()-1].name(), table.cards[table.cards.len()-1]);
-            println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
+            if skipped {
+                println!(
+                    "You have been skipped with {:#?}.",
+                    &table.cards[table.cards.len() - 1].name()
+                );
+                skipped = false;
+                if pickup != 0 { 
+                    println!("You are picking up {}", &pickup);
+                    give_card(pickup, player, &mut board); }
+                continue;
 
-            let mut card_position_input = String::new();
-            io::stdin().read_line(&mut card_position_input)
-            .expect("Failed to read from stdin");    
-            let card_position: usize = card_position_input.trim().parse()
-            .expect("Please type a number!");
+            } else {
+                println!("You have {:#?} cards in your hands.", &player.cards.len());
+                println!("Your cards are {:#?}", player.cards);
+                println!(
+                    "There is {:#?} on the table. {:#?}",
+                    table.cards[table.cards.len() - 1].name(),
+                    table.cards[table.cards.len() - 1]
+                );
+                println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
 
-            match card_position {
-                0 => {
-                    println!("{:#?} I'm giving you a card", player.name);
-                    println!("{:#?} is getting {:#?} from the board", player.name, board.cards.get(board.cards.len()-1).unwrap().name() );
-                    give_card(1, player, &mut board); },
-                1.. => {
-                        let mut card = player.cards[card_position-1];
-                        table.play(player,&mut board, &mut card)   }    }
+                let mut card_position_input = String::new();
+                io::stdin()
+                    .read_line(&mut card_position_input)
+                    .expect("Failed to read from stdin");
+                let card_position: usize = card_position_input
+                    .trim()
+                    .parse()
+                    .expect("Please type a number!");
+
+                match card_position {
+                    0 => {
+                        println!("{:#?} I'm giving you a card", player.name);
+                        println!(
+                            "{:#?} is getting {:#?} from the board",
+                            player.name,
+                            board.cards.get(board.cards.len() - 1).unwrap().name()
+                        );
+                        give_card(1, player, &mut board);
+                    }
+                    1.. => {
+                        let mut card = player.cards[card_position - 1];
+                        let mut power_cards = HashSet::new();
+                        power_cards.insert(&Rank::Four);
+                        power_cards.insert(&Rank::Two);
+                        if power_cards.contains(&card.rank) {
+                            pickup = card.rank.pickup().unwrap();
+                            skipped = true
+                        }
+                        table.play(player, &mut board, &mut card)
+                    }
+                }
+                if player.cards.len() == 0 {
+                    break;
+                }
             }
+        }
     }
 }
 
