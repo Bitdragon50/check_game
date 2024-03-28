@@ -1,12 +1,17 @@
-use actix::prelude::*;
+//use actix::prelude::*;
 use rand::seq::SliceRandom; // Trait that provides the shuffle method
 use rand::thread_rng;
-use std::collections::HashMap;
+use core::fmt;
+use std::{collections::HashMap, iter::Inspect};
 use std::convert::TryInto;
+use std::error::Error;
 use std::fmt::Debug;
 use std::io; //any::Any, collections::HashSet,
 use strum::IntoEnumIterator;
-use strum_macros::EnumIter; // Function that provides a random number generator
+use strum_macros::{Display, EnumIter}; // Function that provides a random number generator
+use std::result::Result;
+use fmt::Write;
+
 
 pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(
     mut vec: Vec<Card>,
@@ -57,16 +62,30 @@ pub struct Card {
     pub suit: Suit,
 }
 
-impl Card {
-    fn new(suit: Suit, rank: Rank) -> Card {
-        Card { suit, rank }
-    }
-}
-impl Message for Card {
-    type Result = Result<(), WrongCardErr>;
+#[derive(Debug)]
+pub enum WrongCard {
+    NotValidNum,
+    NotValidSuit
+
 }
 
-pub struct WrongCardErr;
+
+struct NotValidNum {
+
+}
+
+impl fmt::Display for WrongCard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            WrongCard::NotValidNum => writeln!("Not a Valid Number. Did you mistype?".to_owned()),
+            WrongCard::NotValidSuit => writeln!("Not a Valid Suit. Did you mistype?".to_owned()),
+        }
+    }
+}
+
+impl Error for WrongCard {
+    
+}
 
 #[derive(Debug)]
 pub struct Shuffled;
@@ -87,23 +106,14 @@ impl Deck<Unshuffled> {
             if (suit != Suit::Red) && (suit != Suit::Black) {
                 for rank in Rank::iter() {
                     if rank != Rank::Joker {
-                        vec_cards.push(Card {
-                            suit: suit.clone(),
-                            rank: rank,
-                        })
+                        vec_cards.push(Card::new(suit, rank))
                     }
                 }
             }
         }
         // Create Jokers
-        vec_cards.push(Card {
-            rank: Rank::Joker,
-            suit: Suit::Black,
-        });
-        vec_cards.push(Card {
-            rank: Rank::Joker,
-            suit: Suit::Red,
-        });
+        vec_cards.push(Card::new(Suit::Black, Rank::Joker));
+        vec_cards.push(Card::new(Suit::Red, Rank::Joker));
 
         Deck {
             state: Unshuffled,
@@ -140,31 +150,29 @@ impl FromIterator<Card> for Card {
 }
 
 impl Card {
+    fn new(suit: Suit, rank: Rank) -> Card {
+        Card { suit, rank }
+    }
+
     pub fn name(&self) -> String {
         format!("{:#?} of {:#?}", &self.rank, &self.suit)
     }
 }
 
 impl Rank {
-    pub fn pickup(&self) -> Option<usize> {
+    pub fn pickup(&self) -> Result<usize, WrongCard> {
         if self == &Rank::Joker {
-            return Some(4);
+            return Ok(4);
         } else if self == &Rank::Seven {
-            return Some(2);
+            return Ok(2);
         } else {
-            return None;
+            return Err(WrongCard::NotValidNum);
         }
     }
 
-    pub fn change_to(&self) -> Option<Suit> {
+    pub fn change_to(&self) -> Result<Suit, WrongCard> {
         println!("What suit do you want?");
         let mut suit_input = String::new();
-
-        io::stdin()
-            .read_line(&mut suit_input)
-            .expect("Failed to read from stdin");
-
-        //let mut suit: Suit;
         let spades = "spades".to_owned();
         let hearts = "hearts".to_owned();
         let clubs = "clubs".to_owned();
@@ -175,8 +183,23 @@ impl Rank {
         suit_map.insert(hearts, Suit::Hearts);
         suit_map.insert(diamonds, Suit::Diamonds);
         suit_map.insert(clubs, Suit::Clubs);
+
+        io::stdin()
+            .read_line(&mut suit_input);
         suit_input = suit_input.trim().to_string();
 
-        suit_map.get_mut(&suit_input).copied()
+        //let mut suit: Suit;
+
+        let suit = suit_map.get_mut(&suit_input).copied();
+
+        match suit {
+            Some(Suit::Spades) => Ok(Suit::Spades),
+            Some(Suit::Clubs) => Ok(Suit::Clubs),
+            Some(Suit::Hearts) => Ok(Suit::Hearts),
+            Some(Suit::Diamonds) => Ok(Suit::Diamonds),
+            _ => Err(WrongCard::NotValidSuit)
+            
+            
+        }
     }
 }

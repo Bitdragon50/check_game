@@ -1,10 +1,10 @@
-mod actors;
-mod lib;
+mod cards;
+mod deck;
 use crate::{
-    actors::{give_card,  Board},
-    lib::{Deck, Rank},
+    cards::{give_card,  Board},
+    deck::{Deck, Rank},
 };
-use std::{collections::HashSet, io};
+use std::{collections::HashSet, io, num::ParseIntError};
 
 fn main() {
 
@@ -46,41 +46,44 @@ fn main() {
                 );
                 println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
 
-                let mut card_position_input = String::new();
-                io::stdin()
-                    .read_line(&mut card_position_input)
-                    .expect("Failed to read from stdin");
-                let card_position: usize = card_position_input
-                    .trim()
-                    .parse()
-                    .expect("Please type a number!");
+//============================================================================================================================
+                
+                let card_position = card_position_fn();
 
-                match card_position {
-                    0 => {
-                        println!("{:#?} I'm giving you a card", player.name);
-                        println!(
-                            "{:#?} is getting {:#?} from the board",
-                            player.name,
-                            board.cards.get(board.cards.len() - 1).unwrap().name()
-                        );
-                        give_card(1, player, &mut board);
-                    }
-                    1.. => {
-                        let mut card = player.cards[card_position - 1];
-                        let mut power_cards = HashSet::new();
-                        power_cards.insert(&Rank::Joker);
-                        power_cards.insert(&Rank::Seven);
-                        if power_cards.contains(&card.rank) {
-                            pickup = card.rank.pickup().unwrap();
-                            skipped = true
-                        }
+                
 
-                        if card.rank == Rank::Ace {
-                            skipped = true
-                        }
-                        table.play(player, &mut board, &mut card)
-                    }
+                match card_position { Ok(number) => match number {
+                        0 => {
+                                println!("{:#?} I'm giving you a card", player.name);
+                                println!(
+                                    "{:#?} is getting {:#?} from the board",
+                                    player.name,
+                                    board.cards.get(board.cards.len() - 1).unwrap().name()
+                                );
+                                give_card(1, player, &mut board);
+                            }
+
+                        1.. => {
+                                let mut card = player.cards[number - 1];
+                                let mut power_cards = HashSet::new();
+                                power_cards.insert(&Rank::Joker);
+                                power_cards.insert(&Rank::Seven);
+                                if power_cards.contains(&card.rank) {
+                                    pickup = card.rank.pickup().unwrap();
+                                    skipped = true
+                                }
+
+                                if card.rank == Rank::Ace {
+                                    skipped = true
+                                }
+                                table.play(player, &mut board, &mut card)
+                            }
+                },
+                Err(err) => println!("You didn't type a number {err}")
                 }
+
+//==================================================================================================================
+
                 if board.cards.len() < 6 { board.shuffle_board(&mut table) }
                 if player.cards.len() == 0 {
                     gameover = true;
@@ -89,3 +92,19 @@ fn main() {
         }
     }
 }
+
+
+
+
+fn card_position_fn() -> Result<usize, ParseIntError> {
+    let mut card_position_input = String::new();
+    let _input = io::stdin().read_line(&mut card_position_input);
+    let card_position = card_position_input
+        .trim()
+        .parse();
+    match card_position {
+        Ok(number) => Ok(number),
+        Err(parse_int_error) => Err(parse_int_error)
+    }
+
+    }
