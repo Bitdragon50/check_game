@@ -70,12 +70,8 @@ pub enum WrongCard {
 }
 
 
-struct NotValidNum {
-
-}
-
 impl fmt::Display for WrongCard {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             WrongCard::NotValidNum => writeln!("Not a Valid Number. Did you mistype?".to_owned()),
             WrongCard::NotValidSuit => writeln!("Not a Valid Suit. Did you mistype?".to_owned()),
@@ -184,7 +180,7 @@ impl Rank {
         suit_map.insert(diamonds, Suit::Diamonds);
         suit_map.insert(clubs, Suit::Clubs);
 
-        io::stdin()
+        let _ = io::stdin()
             .read_line(&mut suit_input);
         suit_input = suit_input.trim().to_string();
 
