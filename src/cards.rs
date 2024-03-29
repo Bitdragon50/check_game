@@ -123,5 +123,11 @@ impl Table {
 }
 
 pub fn give_card(amount: usize, player: &mut Player, board: &mut Board) {
+    println!("{:#?} I'm giving you a card", player.name);
+    println!(
+        "{:#?} is getting {:#?} from the board",
+        player.name,
+        board.cards.last().unwrap().name()
+    );
     player.cards.push(board.cards.drain(..amount).collect())
 }

@@ -26,42 +26,39 @@ fn main() {
         for player in &mut plays {
             println!("It is {:#?}'s turn ", player.name);
             if skipped {
-                println!(
-                    "You have been skipped with {:#?}.",
-                    &table.cards[table.cards.len() - 1].name()
-                );
-                skipped = false;
-                if pickup != 0 {
-                    println!("You are picking up {}", &pickup);
-                    give_card(pickup, player, &mut board);
+                if let Some(top_card) = table.cards.last()  { 
+                    println!( "You have been skipped with {:#?}.", top_card.name());
+                    skipped = false; 
                 }
-                continue;
-            } else {
-                println!("You have {:#?} cards in your hands.", &player.cards.len());
-                println!("Your cards are {:#?}", player.cards);
-                println!(
-                    "There is {:#?} on the table. {:#?}",
-                    table.cards[table.cards.len() - 1].name(),
-                    table.cards[table.cards.len() - 1]
-                );
-                println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
+
+                if pickup != 0 { 
+                    println!("You are picking up {}", &pickup); 
+                    give_card(pickup, player, &mut board); 
+                }
+                continue; 
+            }
+
+            else {
 
 //============================================================================================================================
+                println!("You have {:#?} cards in your hands.", &player.cards.len());
+                println!("Your cards are {:#?}", player.cards);
                 
-                let card_position = card_position_fn();
-
+                if let Some(top_card) = table.cards.last()  {
+                    println!( "There is {:#?} on the table. {:#?}", top_card.name(), top_card );
                 
+                } else {
+                    println!("There was no last card")
+                }
 
-                match card_position { Ok(number) => match number {
+
+                //println!( "There is {:#?} on the table. {:#?}", table.cards.last().unwrap().name(), table.cards.last().unwrap() );
+                println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
+
+                match card_position_fn() { Ok(number) => match number {
                         0 => {
-                                println!("{:#?} I'm giving you a card", player.name);
-                                println!(
-                                    "{:#?} is getting {:#?} from the board",
-                                    player.name,
-                                    board.cards.get(board.cards.len() - 1).unwrap().name()
-                                );
                                 give_card(1, player, &mut board);
-                            }
+                            },
 
                         1.. => {
                                 let mut card = player.cards[number - 1];
@@ -79,13 +76,18 @@ fn main() {
                                 table.play(player, &mut board, &mut card)
                             }
                 },
-                Err(err) => println!("You didn't type a number {err}")
+                Err(err) => { 
+                    println!("You didn't type a number {err}");
+                    give_card(1, player, &mut board);
                 }
+            }
 
 //==================================================================================================================
 
                 if board.cards.len() < 6 { board.shuffle_board(&mut table) }
+
                 if player.cards.len() == 0 {
+                    println!("{:#?} has won the game.", player.name);
                     gameover = true;
                 }
             }
