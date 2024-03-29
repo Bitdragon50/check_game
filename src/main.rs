@@ -1,15 +1,27 @@
 mod cards;
 mod deck;
+pub mod web;
 //use cards::Player;
 use deck::Unshuffled;
-
 use crate::{
     cards::{give_card,  Board},
     deck::{Deck, Rank},
 };
 use std::{collections::HashSet, io, num::ParseIntError};
+use axum::{self, response::{Html, IntoResponse}, routing::{get, post}, Form, Json, Router};
 
-fn main() {
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+    //get players
+    //let game = axum::Router::new().route("/", post(add_players(request)));
+    // build our application with a single route
+    let app = Router::new()
+                                .route("/", get(serve_html_file));
+                                //.route("/players", post(io::stdin().read_line(&mut suit_input)));
+
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
     
     let playing_deck: Deck<Unshuffled> = Deck::new();
     let players: Vec<String> = vec!["Alan".to_owned(), "Mamitha".to_owned()];
@@ -95,6 +107,7 @@ fn main() {
 
 
 
+
 fn card_position_fn() -> Result<usize, ParseIntError> {
     let mut card_position_input = String::new();
     let _input = io::stdin().read_line(&mut card_position_input);
@@ -107,3 +120,27 @@ fn card_position_fn() -> Result<usize, ParseIntError> {
     }
 
     }
+
+async fn add_players(request: Json<String>) -> Vec<String> {
+    let name_string = request.0;
+    let name_vec = name_string.to_owned().split(",").map(|str| str.to_owned()).collect();
+    name_vec
+}
+
+async fn greeting() -> String {
+    "Hello Alan".to_owned()
+}
+
+use std::fs;
+
+async fn serve_html_file() -> impl IntoResponse {
+    let html_content = fs::read_to_string("src/template/index.html")
+        .expect("Failed to read HTML file");
+    Html(html_content)
+}
+
+// #[tokio::main]
+// async fn main() {
+//     let app = Router::new().route("/", get(serve_html_file));
+//     // ... rest of your server setup
+// }

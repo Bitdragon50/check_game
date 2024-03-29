@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Payload Example</title>
+</head>
+<body>
+    <form id="myForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name">
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age">
+        <input type="button" value="Submit" id="submitBtn">
+    </form>
+
+    <script>
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            var form = document.getElementById('myForm');
+            var formData = new FormData(form);
+            var object = {};
+            formData.forEach(function(value, key){
+                object[key] = value;
+            });
+            var jsonPayload = JSON.stringify(object);
+
+            // Now you can send `jsonPayload` to a server using `fetch` or `XMLHttpRequest`
+            console.log(jsonPayload);
+        });
+    </script>
+</body>
+</html>
