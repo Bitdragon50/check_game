@@ -1,5 +1,8 @@
 mod cards;
 mod deck;
+//use cards::Player;
+use deck::Unshuffled;
+
 use crate::{
     cards::{give_card,  Board},
     deck::{Deck, Rank},
@@ -7,20 +10,14 @@ use crate::{
 use std::{collections::HashSet, io, num::ParseIntError};
 
 fn main() {
-
     
-    let playing_deck = Deck::new();
-
-    let players = vec!["Alan".to_owned(), "Mamitha".to_owned()];
-
-    let (mut board, mut table, mut plays) = Board::new(playing_deck.shuffle_deck(), players);
-
-    println!("{:#?}", &table);
-    println!("player 1 is {:#?}", &plays[0]);
-
+    let playing_deck: Deck<Unshuffled> = Deck::new();
+    let players: Vec<String> = vec!["Alan".to_owned(), "Mamitha".to_owned()];
+    let (mut board , mut table, mut plays) = Board::new(playing_deck.shuffle_deck(), players);
+    
     let mut pickup: usize = 0;
     let mut skipped: bool = false;
-    let mut gameover = false;
+    let mut gameover: bool = false;
 
     while !gameover {
         for player in &mut plays {

@@ -2,13 +2,13 @@
 use rand::seq::SliceRandom; // Trait that provides the shuffle method
 use rand::thread_rng;
 use core::fmt;
-use std::{collections::HashMap, iter::Inspect};
+use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt::Debug;
 use std::io; //any::Any, collections::HashSet,
 use strum::IntoEnumIterator;
-use strum_macros::{Display, EnumIter}; // Function that provides a random number generator
+use strum_macros:: EnumIter; // Function that provides a random number generator
 use std::result::Result;
 use fmt::Write;
 
