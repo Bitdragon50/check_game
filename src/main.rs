@@ -12,12 +12,13 @@ use axum::{self, response::{Html, IntoResponse}, routing::{get, post}, Form, Jso
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
+    console_error_panic_hook::set_once();
     //get players
     //let game = axum::Router::new().route("/", post(add_players(request)));
     // build our application with a single route
     let app = Router::new()
-                                .route("/", get(serve_html_file));
-                                //.route("/players", post(io::stdin().read_line(&mut suit_input)));
+                                .route("/", get(serve_html_file))
+                                .route("/submit", post(serve_html_file));
 
     // run our app with hyper, listening globally on port 3000
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();

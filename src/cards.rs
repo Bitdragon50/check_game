@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use crate::deck::{Card, Deck, Rank, Shuffled, Suit};
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct Board {
@@ -67,14 +67,14 @@ impl Table {
                 self.cards.push(Card {
                     rank: card.rank,
                     suit: {
-                        match card.rank.change_to(){
+                        match card.rank.change_to() {
                             Ok(suit) => suit,
                             Err(err) => {
                                 println!("We got an error, did you mispell? {}", err);
                                 card.suit
                             }
-
-                    }},
+                        }
+                    },
                 })
             }
         } else {

@@ -1,17 +1,16 @@
 //use actix::prelude::*;
+use core::fmt;
+use fmt::Write;
 use rand::seq::SliceRandom; // Trait that provides the shuffle method
 use rand::thread_rng;
-use core::fmt;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt::Debug;
 use std::io; //any::Any, collections::HashSet,
-use strum::IntoEnumIterator;
-use strum_macros:: EnumIter; // Function that provides a random number generator
 use std::result::Result;
-use fmt::Write;
-
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter; // Function that provides a random number generator
 
 pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(
     mut vec: Vec<Card>,
@@ -65,10 +64,8 @@ pub struct Card {
 #[derive(Debug)]
 pub enum WrongCard {
     NotValidNum,
-    NotValidSuit
-
+    NotValidSuit,
 }
-
 
 impl fmt::Display for WrongCard {
     fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -79,9 +76,7 @@ impl fmt::Display for WrongCard {
     }
 }
 
-impl Error for WrongCard {
-    
-}
+impl Error for WrongCard {}
 
 #[derive(Debug)]
 pub struct Shuffled;
@@ -180,8 +175,7 @@ impl Rank {
         suit_map.insert(diamonds, Suit::Diamonds);
         suit_map.insert(clubs, Suit::Clubs);
 
-        let _ = io::stdin()
-            .read_line(&mut suit_input);
+        let _ = io::stdin().read_line(&mut suit_input);
         suit_input = suit_input.trim().to_string();
 
         //let mut suit: Suit;
@@ -193,9 +187,7 @@ impl Rank {
             Some(Suit::Clubs) => Ok(Suit::Clubs),
             Some(Suit::Hearts) => Ok(Suit::Hearts),
             Some(Suit::Diamonds) => Ok(Suit::Diamonds),
-            _ => Err(WrongCard::NotValidSuit)
-            
-            
+            _ => Err(WrongCard::NotValidSuit),
         }
     }
 }
