@@ -1,15 +1,42 @@
 mod cards;
 mod deck;
-//use cards::Player;
+use std::io::Error;
+use redis::{Commands, Connection};
 use deck::Unshuffled;
-
 use crate::{
     cards::{give_card,  Board},
     deck::{Deck, Rank},
 };
-use std::{collections::HashSet, io, num::ParseIntError};
+use std::{collections::HashSet, error, io, num::ParseIntError, process::{Child, Command}};
 
-fn main() {
+fn start_db() -> Result<(Child , Connection), Error> {
+    let mut redis_server = Command::new("redis-server")
+        .spawn()
+        .expect("failed to start redis server");
+    // Connect to the Redis server
+    let client = redis::Client::open("redis://127.0.0.1/").expect("Can't start client");
+    let mut con = client.get_connection().expect("Can't connect to db");
+    Ok((redis_server,con))
+
+}
+
+
+fn main() -> redis::RedisResult<()> {
+    let (mut redis_server,mut con) = start_db()?;
+
+    // Set a key-value pair in Redis
+    let _: () = con.set("my_key", 42)?;
+
+    // Get the value back from Redis
+    let my_value: usize = con.get("my_key")?;
+
+    println!("Got value from Redis: {}", my_value);
+    redis_server.kill().expect("failed to kill redis server");
+
+    Ok(())
+}
+
+fn main_2() {
     
     let playing_deck: Deck<Unshuffled> = Deck::new();
     let players: Vec<String> = vec!["Alan".to_owned(), "Mamitha".to_owned()];
