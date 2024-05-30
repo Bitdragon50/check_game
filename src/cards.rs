@@ -39,7 +39,9 @@ impl Board {
 
     pub fn shuffle_board(&mut self, table: &mut Table) {
         let to_shuffle: HashSet<Card> = table.cards.drain(..table.cards.len()).collect();
-        to_shuffle.into_iter().for_each(|card| self.cards.push(card))
+        to_shuffle
+            .into_iter()
+            .for_each(|card| self.cards.push(card))
     }
 }
 
@@ -55,7 +57,9 @@ impl Table {
                         .cards
                         .iter()
                         .position(|iter_card| iter_card == card)
-                        .expect("The card the player is trying to play doesn't exist in their hand"),
+                        .expect(
+                            "The card the player is trying to play doesn't exist in their hand",
+                        ),
                 ),
             );
             if card.rank == Rank::Jack {
@@ -77,12 +81,19 @@ impl Table {
                 "{:#?} you can't play {:#?} on {:#?}",
                 player.name,
                 card.name(),
-                self.cards.last().expect("The table has no top card at the moment").name()
+                self.cards
+                    .last()
+                    .expect("The table has no top card at the moment")
+                    .name()
             );
             println!(
                 "{:#?} is getting {:#?} from the board",
                 player.name,
-                board.cards.last().expect("The board is out of cards").name()
+                board
+                    .cards
+                    .last()
+                    .expect("The board is out of cards")
+                    .name()
             );
             give_card(1, player, board)
         }
@@ -120,7 +131,11 @@ pub fn give_card(amount: usize, player: &mut Player, board: &mut Board) {
     println!(
         "{:#?} is getting {:#?} from the board",
         player.name,
-        board.cards.last().expect("The board is out of cards").name()
+        board
+            .cards
+            .last()
+            .expect("The board is out of cards")
+            .name()
     );
     player.cards.push(board.cards.drain(..amount).collect())
 }

@@ -45,7 +45,7 @@ fn main() {
                 } else {
                     println!("There was no last card")
                 }
-                
+
                 println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
 
                 match card_position_fn() {
@@ -84,7 +84,7 @@ fn main() {
 
                 if player.cards.is_empty() {
                     println!("{:#?} has won the game.", player.name);
-                    break
+                    break;
                 }
             }
         }
