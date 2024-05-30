@@ -29,7 +29,7 @@ impl Board {
                 cards: players_card,
             })
         }
-        let first_card = vec![deck_vec.pop().unwrap()];
+        let first_card = vec![deck_vec.pop().expect("The deck is empty")];
         (
             Board { cards: deck_vec },
             Table { cards: first_card },
@@ -38,13 +38,8 @@ impl Board {
     }
 
     pub fn shuffle_board(&mut self, table: &mut Table) {
-        //let top_card = table.cards.pop().unwrap();
-        // drain card
         let to_shuffle: HashSet<Card> = table.cards.drain(..table.cards.len()).collect();
-
-        for card in to_shuffle {
-            self.cards.push(card)
-        }
+        to_shuffle.into_iter().for_each(|card| self.cards.push(card))
     }
 }
 
@@ -60,7 +55,7 @@ impl Table {
                         .cards
                         .iter()
                         .position(|iter_card| iter_card == card)
-                        .unwrap(),
+                        .expect("The card the player is trying to play doesn't exist in their hand"),
                 ),
             );
             if card.rank == Rank::Jack {
@@ -82,20 +77,20 @@ impl Table {
                 "{:#?} you can't play {:#?} on {:#?}",
                 player.name,
                 card.name(),
-                self.cards.last().unwrap().name()
+                self.cards.last().expect("The table has no top card at the moment").name()
             );
             println!(
                 "{:#?} is getting {:#?} from the board",
                 player.name,
-                board.cards.last().unwrap().name()
+                board.cards.last().expect("The board is out of cards").name()
             );
             give_card(1, player, board)
         }
     }
 
     fn playable(&mut self, card: Option<(&Rank, &Suit)>) -> bool {
-        let incoming_suit = card.unwrap().1;
-        let incoming_rank = card.unwrap().0;
+        let incoming_suit = card.expect("No card received").1;
+        let incoming_rank = card.expect("No card received").0;
         let card_on_deck = self.cards[self.cards.len() - 1];
 
         if incoming_rank != &Rank::Joker && card_on_deck.rank != Rank::Joker {
@@ -125,7 +120,7 @@ pub fn give_card(amount: usize, player: &mut Player, board: &mut Board) {
     println!(
         "{:#?} is getting {:#?} from the board",
         player.name,
-        board.cards.last().unwrap().name()
+        board.cards.last().expect("The board is out of cards").name()
     );
     player.cards.push(board.cards.drain(..amount).collect())
 }

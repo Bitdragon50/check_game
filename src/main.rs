@@ -45,8 +45,7 @@ fn main() {
                 } else {
                     println!("There was no last card")
                 }
-
-                //println!( "There is {:#?} on the table. {:#?}", table.cards.last().unwrap().name(), table.cards.last().unwrap() );
+                
                 println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
 
                 match card_position_fn() {
