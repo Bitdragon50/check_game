@@ -1,103 +1,99 @@
-use strum_macros::EnumIter;
-use strum::IntoEnumIterator;
-use std::convert::TryInto;
-use std::fmt::Debug;
-use rand::seq::SliceRandom; // Trait that provides the shuffle method
-use rand::thread_rng;       // Function that provides a random number generator
+mod cards;
+mod deck;
+//use cards::Player;
+use deck::Unshuffled;
 
-
-fn vec_to_array<Card: std::fmt::Debug, const N: usize>(mut vec: Vec<Card>) -> Result<[Card; N], Vec<Card>> {
-    if vec.len() == N {
-        let array: [Card; N] = vec.drain(..).collect::<Vec<_>>().try_into().expect("Length mismatch");
-        Ok(array)
-    } else {
-        Err(vec)
-    }
-}
-
-
-
-#[derive(Debug,EnumIter,Clone)]
-enum Suit {
-    Spade,
-    Club,
-    Diamond,
-    Heart
-}
-
-#[derive(Debug,EnumIter)]
-enum Rank {
-    Ace,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King
-}
-
-#[derive(Debug)]
-struct Card {
-    suit: Suit,
-    rank: Rank
-}
-
-impl Card {
-    fn new(suit: Suit, rank: Rank) -> Card {
-        Card { suit, rank }
-    }
-}
-
-
-// struct Joker {
-//     suit: 
-// }
-
-#[derive(Debug)]
-struct Shuffled;
-
-#[derive(Debug)]
-struct Unshuffled;
-
-#[derive(Debug)]
-struct Deck<T> {
-    state: T,
-    cards: [Card; 52]
-}
-
-impl Deck<Unshuffled> {
-    fn new() -> Deck<Unshuffled> {
-        let mut vec_cards: Vec<Card> = vec![];
-        for suit in Suit::iter() {
-                for rank in Rank::iter() {
-                    vec_cards.push(Card { suit: suit.clone(), rank: rank })
-                }
-            }
-            
-        Deck {
-            state: Unshuffled,
-            cards: vec_to_array(vec_cards).unwrap()
-        }
-    }
-
-    fn shuffle_deck(mut self) -> Deck<Shuffled> {
-        let mut rng = thread_rng();
-        self.cards.shuffle(&mut rng);
-        Deck { state: Shuffled, cards: self.cards }
-    }
-}
-
-
+use crate::{
+    cards::{give_card, Board},
+    deck::{Deck, Rank},
+};
+use std::{collections::HashSet, io, num::ParseIntError};
 
 fn main() {
-    let playing_deck = Deck::new();
-    println!("{:#?}", &playing_deck);
-    
-    println!("{:#?}", playing_deck.shuffle_deck());
+    let playing_deck: Deck<Unshuffled> = Deck::new();
+    let players: Vec<String> = vec!["Alan".to_owned(), "Mamitha".to_owned()];
+    let (mut board, mut table, mut plays) = Board::new(playing_deck.shuffle_deck(), players);
+
+    let mut pickup: usize = 0;
+    let mut skipped: bool = false;
+
+    loop {
+        for player in &mut plays {
+            println!("It is {:#?}'s turn ", player.name);
+            if skipped {
+                if let Some(top_card) = table.cards.last() {
+                    println!("You have been skipped with {:#?}.", top_card.name());
+                    skipped = false;
+                }
+
+                if pickup != 0 {
+                    println!("You are picking up {}", &pickup);
+                    give_card(pickup, player, &mut board);
+                }
+                continue;
+            } else {
+                //============================================================================================================================
+                println!("You have {:#?} cards in your hands.", &player.cards.len());
+                println!("Your cards are {:#?}", player.cards);
+
+                if let Some(top_card) = table.cards.last() {
+                    println!(
+                        "There is {:#?} on the table. {:#?}",
+                        top_card.name(),
+                        top_card
+                    );
+                } else {
+                    println!("There was no last card")
+                }
+                
+                println!("What is the position of the card you wish to play {:#?}, write 0 if you have no card", player.name);
+
+                match card_position_fn() {
+                    Ok(number) => match number {
+                        0 => {
+                            give_card(1, player, &mut board);
+                        }
+
+                        1.. => {
+                            let mut card = player.cards[number - 1];
+                            let mut power_cards = HashSet::new();
+                            power_cards.insert(&Rank::Joker);
+                            power_cards.insert(&Rank::Seven);
+                            if power_cards.contains(&card.rank) {
+                                pickup = card.rank.pickup().unwrap();
+                                skipped = true
+                            }
+
+                            if card.rank == Rank::Ace {
+                                skipped = true
+                            }
+                            table.play(player, &mut board, &mut card)
+                        }
+                    },
+                    Err(err) => {
+                        println!("You didn't type a number {err}");
+                        give_card(1, player, &mut board);
+                    }
+                }
+
+                //==================================================================================================================
+
+                if board.cards.len() < 6 {
+                    board.shuffle_board(&mut table)
+                }
+
+                if player.cards.is_empty() {
+                    println!("{:#?} has won the game.", player.name);
+                    break
+                }
+            }
+        }
+    }
+}
+
+fn card_position_fn() -> Result<usize, ParseIntError> {
+    let mut card_position_input = String::new();
+    let _input = io::stdin().read_line(&mut card_position_input);
+    let card_position = card_position_input.trim().parse();
+    card_position
 }
