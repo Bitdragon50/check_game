@@ -1,25 +1,22 @@
 //use actix::prelude::*;
+use core::fmt;
+use fmt::Write;
 use rand::seq::SliceRandom; // Trait that provides the shuffle method
 use rand::thread_rng;
-use core::fmt;
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::error::Error;
 use std::fmt::Debug;
 use std::io; //any::Any, collections::HashSet,
-use strum::IntoEnumIterator;
-use strum_macros:: EnumIter; // Function that provides a random number generator
 use std::result::Result;
-use fmt::Write;
-
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter; // Function that provides a random number generator
 
 pub fn vec_to_array<Card: std::fmt::Debug, const N: usize>(
     mut vec: Vec<Card>,
 ) -> Result<[Card; N], Vec<Card>> {
     if vec.len() == N {
-        let array: [Card; N] = vec
-            .drain(..)
-            .collect::<Vec<_>>()
+        let array: [Card; N] = std::mem::take(&mut vec)
             .try_into()
             .expect("Length mismatch");
         Ok(array)
@@ -65,10 +62,8 @@ pub struct Card {
 #[derive(Debug)]
 pub enum WrongCard {
     NotValidNum,
-    NotValidSuit
-
+    NotValidSuit,
 }
-
 
 impl fmt::Display for WrongCard {
     fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -79,9 +74,7 @@ impl fmt::Display for WrongCard {
     }
 }
 
-impl Error for WrongCard {
-    
-}
+impl Error for WrongCard {}
 
 #[derive(Debug)]
 pub struct Shuffled;
@@ -91,7 +84,7 @@ pub struct Unshuffled;
 
 #[derive(Debug)]
 pub struct Deck<T> {
-    state: T,
+    _state: T,
     cards: [Card; 54],
 }
 
@@ -112,7 +105,7 @@ impl Deck<Unshuffled> {
         vec_cards.push(Card::new(Suit::Red, Rank::Joker));
 
         Deck {
-            state: Unshuffled,
+            _state: Unshuffled,
             cards: vec_to_array(vec_cards).unwrap(),
         }
     }
@@ -121,16 +114,15 @@ impl Deck<Unshuffled> {
         let mut rng = thread_rng();
         self.cards.shuffle(&mut rng);
         Deck {
-            state: Shuffled,
+            _state: Shuffled,
             cards: self.cards,
         }
     }
 }
 
 impl Deck<Shuffled> {
-    pub fn to_vec(self) -> Vec<Card> {
-        let card_vec = self.cards.to_vec();
-        card_vec
+    pub fn to_vec(&self) -> Vec<Card> {
+        self.cards.to_vec()
     }
 }
 
@@ -158,7 +150,7 @@ impl Card {
 impl Rank {
     pub fn pickup(&self) -> Result<usize, WrongCard> {
         if self == &Rank::Joker {
-            return Ok(4);
+            Ok(4)
         } else if self == &Rank::Seven {
             return Ok(2);
         } else {
@@ -180,8 +172,7 @@ impl Rank {
         suit_map.insert(diamonds, Suit::Diamonds);
         suit_map.insert(clubs, Suit::Clubs);
 
-        let _ = io::stdin()
-            .read_line(&mut suit_input);
+        let _ = io::stdin().read_line(&mut suit_input);
         suit_input = suit_input.trim().to_string();
 
         //let mut suit: Suit;
@@ -193,9 +184,7 @@ impl Rank {
             Some(Suit::Clubs) => Ok(Suit::Clubs),
             Some(Suit::Hearts) => Ok(Suit::Hearts),
             Some(Suit::Diamonds) => Ok(Suit::Diamonds),
-            _ => Err(WrongCard::NotValidSuit)
-            
-            
+            _ => Err(WrongCard::NotValidSuit),
         }
     }
 }

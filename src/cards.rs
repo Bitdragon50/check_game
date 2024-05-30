@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use crate::deck::{Card, Deck, Rank, Shuffled, Suit};
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct Board {
@@ -67,14 +67,14 @@ impl Table {
                 self.cards.push(Card {
                     rank: card.rank,
                     suit: {
-                        match card.rank.change_to(){
+                        match card.rank.change_to() {
                             Ok(suit) => suit,
                             Err(err) => {
                                 println!("We got an error, did you mispell? {}", err);
                                 card.suit
                             }
-
-                    }},
+                        }
+                    },
                 })
             }
         } else {
@@ -82,12 +82,12 @@ impl Table {
                 "{:#?} you can't play {:#?} on {:#?}",
                 player.name,
                 card.name(),
-                self.cards.get(self.cards.len() - 1).unwrap().name()
+                self.cards.last().unwrap().name()
             );
             println!(
                 "{:#?} is getting {:#?} from the board",
                 player.name,
-                board.cards.get(board.cards.len() - 1).unwrap().name()
+                board.cards.last().unwrap().name()
             );
             give_card(1, player, board)
         }
@@ -112,11 +112,9 @@ impl Table {
             black_set.insert(Suit::Clubs);
             // red jokers play on diamonds and heart
             if red_set.contains(incoming_suit) && red_set.contains(&card_on_deck.suit) {
-                return true;
-            } else if black_set.contains(incoming_suit) && black_set.contains(&card_on_deck.suit) {
-                return true;
+                true
             } else {
-                return false;
+                black_set.contains(incoming_suit) && black_set.contains(&card_on_deck.suit)
             }
         }
     }
