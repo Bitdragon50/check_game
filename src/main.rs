@@ -16,9 +16,8 @@ fn main() {
 
     let mut pickup: usize = 0;
     let mut skipped: bool = false;
-    let mut gameover: bool = false;
 
-    while !gameover {
+    loop {
         for player in &mut plays {
             println!("It is {:#?}'s turn ", player.name);
             if skipped {
@@ -86,7 +85,7 @@ fn main() {
 
                 if player.cards.is_empty() {
                     println!("{:#?} has won the game.", player.name);
-                    gameover = true;
+                    break
                 }
             }
         }
